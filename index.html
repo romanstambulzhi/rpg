@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Life RPG</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --tg-theme-bg-color: #efeff4;
+            --tg-theme-text-color: #000000;
+            --tg-theme-hint-color: #8e8e93;
+            --tg-theme-button-color: #2481cc;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-secondary-bg-color: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 0;
+            padding: 16px;
+            user-select: none;
+        }
+
+        .profile-card {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        h2 {
+            margin: 0 0 4px 0;
+            font-size: 20px;
+        }
+
+        .level-badge {
+            display: inline-block;
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .xp-container {
+            background-color: #e5e5ea;
+            border-radius: 8px;
+            height: 12px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .xp-bar {
+            background: linear-gradient(90deg, #4cd964, #5ac8fa);
+            height: 100%;
+            width: 45%; /* Потом сделаем динамическим */
+            transition: width 0.3s ease;
+        }
+
+        .xp-text {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color);
+            margin-top: 4px;
+        }
+
+        .stats-container {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .stat-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .stat-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: var(--tg-theme-button-color);
+        }
+
+        .coins-badge {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffcc00;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="profile-card">
+        <div class="avatar" id="user-avatar">?</div>
+        <h2 id="user-name">Загрузка...</h2>
+        <div class="level-badge">Уровень <span id="user-level">1</span></div>
+        
+        <div class="xp-container">
+            <div class="xp-bar" id="xp-bar"></div>
+        </div>
+        <div class="xp-text"><span id="current-xp">45</span> / 100 XP</div>
+        
+        <div class="coins-badge">
+            💰 <span id="user-coins">150</span> монет
+        </div>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-row">
+            <div class="stat-info">🧠 Ум</div>
+            <div class="stat-value"><span id="stat-mind">15</span> pts</div>
+        </div>
+        <div class="stat-row">
+            <div class="stat-info">💪 Сила</div>
+            <div class="stat-value"><span id="stat-strength">20</span> pts</div>
+        </div>
+        <div class="stat-row">
+            <div class="stat-info">💰 Финансы</div>
+            <div class="stat-value"><span id="stat-finance">10</span> pts</div>
+        </div>
+        <div class="stat-row">
+            <div class="stat-info">🤝 Социальность</div>
+            <div class="stat-value"><span id="stat-social">5</span> pts</div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram WebApp API
+        const tg = window.Telegram.WebApp;
+        
+        // Расширяем приложение на весь экран телефона
+        tg.expand();
+
+        // Применяем цвета темы Telegram (чтобы на iOS подстраивалось под темную/светлую тему)
+        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.backgroundColor || '#efeff4');
+        document.documentElement.style.setProperty('--tg-theme-text-color', tg.textColor || '#000000');
+        document.documentElement.style.setProperty('--tg-theme-hint-color', tg.hintColor || '#8e8e93');
+        document.documentElement.style.setProperty('--tg-theme-button-color', tg.buttonColor || '#2481cc');
+        document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.buttonTextColor || '#ffffff');
+        document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.secondaryBgColor || '#ffffff');
+
+        // Получаем данные пользователя прямо из Telegram!
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            document.getElementById('user-name').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+            if (user.first_name) {
+                document.getElementById('user-avatar').innerText = user.first_name.charAt(0).toUpperCase();
+            }
+        } else {
+            // Если запущено просто в браузере вне телеграма
+            document.getElementById('user-name').innerText = "Тестовый Персонаж";
+            document.getElementById('user-avatar').innerText = "Т";
+        }
+    </script>
+</body>
+</html>
