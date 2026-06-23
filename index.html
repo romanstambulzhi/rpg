@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeuroHustle</title>
+    <title>System</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
         :root {
-            --bg-color: #0A0A0B;
-            --surface-color: #161618;
-            --accent-color: #ECECEC;
+            --bg-color: #000000;
+            --surface-color: #111112;
+            --surface-border: #1F1F22;
+            --accent-color: #FFFFFF;
             --text-primary: #FFFFFF;
-            --text-secondary: #8A8A8E;
-            --success-color: #32D74B;
+            --text-secondary: #707075;
+            --stat-metric: #E1E1E6;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -27,225 +28,279 @@
             padding: 0;
             user-select: none;
             overflow-x: hidden;
+            letter-spacing: -0.01em;
         }
 
-        /* Анимации переходов */
         .page {
             display: none;
-            padding: 24px 20px 100px 20px;
-            animation: fadeIn 0.3s ease;
+            padding: 32px 24px 120px 24px;
+            animation: fadeIn 0.2s cubic-bezier(0.25, 1, 0.5, 1);
         }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Типографика */
-        h1 { font-size: 28px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px; }
-        h2 { font-size: 20px; font-weight: 600; margin: 0 0 16px 0; }
-        p { color: var(--text-secondary); font-size: 15px; margin: 0 0 24px 0; line-height: 1.4; }
+        h1 { font-size: 24px; font-weight: 600; margin: 0 0 6px 0; }
+        .subtitle { color: var(--text-secondary); font-size: 14px; margin: 0 0 32px 0; font-weight: 400; }
+        h2 { font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin: 0 0 16px 0; }
 
-        /* Карточки */
         .card {
             background-color: var(--surface-color);
-            border-radius: 20px;
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
             padding: 20px;
             margin-bottom: 16px;
-            border: 1px solid rgba(255,255,255,0.05);
         }
 
         /* Прогресс бар */
-        .progress-wrapper { margin-top: 16px; }
+        .progress-container { margin: 8px 0; }
         .progress-bar {
-            height: 6px;
-            background-color: rgba(255,255,255,0.1);
-            border-radius: 4px;
+            height: 4px;
+            background-color: var(--surface-border);
+            border-radius: 2px;
             overflow: hidden;
         }
         .progress-fill {
             height: 100%;
-            background-color: var(--text-primary);
-            width: 65%;
-            border-radius: 4px;
-            transition: width 0.5s ease;
+            background-color: var(--accent-color);
+            width: 60%;
+            transition: width 0.4s ease;
         }
-        .progress-stats { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary); margin-top: 8px; font-weight: 500; }
+        .progress-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-top: 8px; font-weight: 500; }
 
-        /* Списки задач */
-        .task-item {
+        /* Сетка характеристик */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 11fr); gap: 12px; margin-bottom: 24px; }
+        .stat-box {
+            background-color: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 16px 12px;
+            text-align: left;
+        }
+        .stat-label { font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.02em; }
+        .stat-num { font-size: 20px; font-weight: 600; margin-top: 4px; color: var(--stat-metric); }
+
+        /* Список задач */
+        .item-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 16px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid var(--surface-border);
         }
-        .task-item:last-child { border-bottom: none; }
-        .task-info h3 { font-size: 16px; margin: 0 0 4px 0; font-weight: 500; }
-        .task-info span { font-size: 13px; color: var(--success-color); }
+        .item-row:last-child { border-bottom: none; }
+        .item-meta h3 { font-size: 15px; margin: 0 0 4px 0; font-weight: 500; color: var(--text-primary); }
+        .item-meta span { font-size: 12px; color: var(--text-secondary); }
+        
         .btn-action {
-            background-color: var(--text-primary);
+            background-color: var(--accent-color);
             color: var(--bg-color);
             border: none;
             padding: 8px 16px;
-            border-radius: 100px;
+            border-radius: 6px;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
+            transition: opacity 0.1s ease;
         }
+        .btn-action:active { opacity: 0.8; }
 
-        /* Таблица лидеров */
-        .leaderboard-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; }
-        .lb-rank { font-size: 16px; font-weight: 700; color: var(--text-secondary); width: 24px; }
-        .lb-avatar { width: 40px; height: 40px; border-radius: 50%; background: #333; display: flex; justify-content: center; align-items: center; font-weight: 600;}
-        .lb-info { flex-grow: 1; }
-        .lb-info h4 { margin: 0; font-size: 15px; font-weight: 500;}
-        .lb-score { font-weight: 600; font-size: 15px; color: var(--accent-color); }
+        /* Соревновательный модуль (Арена) */
+        .vs-header {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 32px;
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            padding: 24px 16px;
+            border-radius: 12px;
+        }
+        .vs-user h4 { margin: 0 0 4px 0; font-size: 15px; font-weight: 500; }
+        .vs-user p { margin: 0; font-size: 13px; color: var(--text-secondary); }
+        .vs-divider { font-size: 12px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.1em; }
+        
+        .report-log {
+            background-color: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .report-log-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; }
+        .user-tag { color: var(--text-primary); font-weight: 500; }
+        .date-tag { color: var(--text-secondary); }
+        .report-log-body { font-size: 14px; color: var(--stat-metric); line-height: 1.4; }
 
-        /* Навигация (Bottom Nav) */
+        /* Ментор сообщения */
+        .chat-container { display: flex; flex-direction: column; gap: 16px; }
+        .msg-ai { background: var(--surface-color); border: 1px solid var(--surface-border); padding: 18px; border-radius: 12px; font-size: 14px; line-height: 1.5; color: var(--stat-metric); }
+
+        /* Навигация */
         .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: rgba(22, 22, 24, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             display: flex; justify-content: space-around;
-            padding: 12px 0 24px 0;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 12px 0 28px 0;
+            border-top: 1px solid var(--surface-border);
             z-index: 100;
         }
         .nav-item {
-            color: var(--text-secondary);
-            text-align: center; font-size: 11px; font-weight: 500;
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            color: var(--text-secondary); text-align: center; font-size: 10px; font-weight: 500;
+            display: flex; flex-direction: column; align-items: center; gap: 6px; width: 20%;
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
         }
         .nav-item.active { color: var(--text-primary); }
-        .nav-icon { width: 24px; height: 24px; fill: currentColor; }
+        .nav-icon { width: 20px; height: 20px; fill: currentColor; }
 
-        /* Модальное окно отчета */
+        /* Модальные окна */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
             display: none; justify-content: center; align-items: flex-end; z-index: 200;
         }
         .modal {
-            background: var(--surface-color); width: 100%; border-radius: 24px 24px 0 0;
-            padding: 24px; padding-bottom: 50px;
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+            background: var(--surface-color); width: 100%; border-radius: 16px 16px 0 0;
+            padding: 24px; padding-bottom: 48px; border-top: 1px solid var(--surface-border);
+            transform: translateY(100%); transition: transform 0.2s ease-out;
         }
         .modal.open { transform: translateY(0); }
         textarea {
-            width: 100%; height: 120px; border-radius: 12px;
-            background: #0A0A0B; border: 1px solid rgba(255,255,255,0.1);
-            color: white; padding: 12px; font-family: 'Inter'; font-size: 15px;
-            resize: none; margin-bottom: 16px;
+            width: 100%; height: 140px; border-radius: 8px;
+            background: var(--bg-color); border: 1px solid var(--surface-border);
+            color: white; padding: 14px; font-family: 'Inter'; font-size: 14px;
+            resize: none; margin-bottom: 16px; line-height: 1.4;
         }
-        textarea:focus { outline: none; border-color: rgba(255,255,255,0.3); }
+        textarea:focus { outline: none; border-color: #444; }
         .btn-submit {
-            width: 100%; background: var(--text-primary); color: var(--bg-color);
-            padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 600; border: none;
+            width: 100%; background: var(--accent-color); color: var(--bg-color);
+            padding: 16px; border-radius: 8px; font-size: 15px; font-weight: 600; border: none;
         }
     </style>
 </head>
 <body>
 
     <div id="page-profile" class="page active">
-        <h1 id="user-greeting">Профиль</h1>
-        <p>Управление состоянием и капиталом.</p>
+        <h1 id="user-greeting">Загрузка</h1>
+        <div class="subtitle">Индивидуальный статус развития.</div>
 
         <div class="card">
-            <h2>Уровень 4</h2>
-            <div class="progress-wrapper">
-                <div class="progress-bar"><div class="progress-fill" style="width: 65%;"></div></div>
-                <div class="progress-stats"><span>1200 XP</span><span>1800 XP</span></div>
+            <div class="progress-labels"><span style="text-transform:uppercase; letter-spacing:0.05em; color:var(--text-secondary)">Уровень 4</span></div>
+            <div class="progress-container">
+                <div class="progress-bar"><div class="progress-fill" style="width: 72%;"></div></div>
             </div>
+            <div class="progress-labels"><span>1440 XP</span><span>2000 XP</span></div>
         </div>
 
-        <div class="card" style="display: flex; justify-content: space-between; text-align: center;">
-            <div><div style="font-size: 24px; font-weight: 700;">🧠 45</div><div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Ум</div></div>
-            <div><div style="font-size: 24px; font-weight: 700;">💪 30</div><div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Сила</div></div>
-            <div><div style="font-size: 24px; font-weight: 700;">💰 85</div><div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Финансы</div></div>
+        <div class="stats-grid">
+            <div class="stat-box"><div class="stat-label">Mind</div><div class="stat-num" id="stat-mind">52</div></div>
+            <div class="stat-box"><div class="stat-label">Power</div><div class="stat-num" id="stat-strength">38</div></div>
+            <div class="stat-box"><div class="stat-label">Finance</div><div class="stat-num" id="stat-finance">90</div></div>
         </div>
     </div>
 
     <div id="page-quests" class="page">
-        <h1>В фокусе</h1>
-        <p>Задачи на сегодня. Требуется ИИ-верификация.</p>
+        <h1>Задачи</h1>
+        <div class="subtitle">Текущие векторы действий, требующие валидации.</div>
 
         <div class="card">
-            <div class="task-item">
-                <div class="task-info">
-                    <h3>Настроить рекламную кампанию</h3>
-                    <span>+50 XP | +30 Монет</span>
+            <div class="item-row">
+                <div class="item-meta">
+                    <h3>Разработка программного модуля</h3>
+                    <span>+50 XP / +30 Coins</span>
                 </div>
-                <button class="btn-action" onclick="openReportModal(1, 'Настроить рекламную кампанию')">Отчет</button>
+                <button class="btn-action" onclick="openReportModal(1, 'Разработка программного модуля')">Отчет</button>
             </div>
-            <div class="task-item">
-                <div class="task-info">
-                    <h3>Прочитать 20 страниц</h3>
-                    <span>+15 XP | +10 Монет</span>
+            <div class="item-row">
+                <div class="item-meta">
+                    <h3>Анализ конкурентной среды</h3>
+                    <span>+40 XP / +20 Coins</span>
                 </div>
-                <button class="btn-action" onclick="openReportModal(2, 'Прочитать 20 страниц')">Отчет</button>
+                <button class="btn-action" onclick="openReportModal(2, 'Анализ конкурентной среды')">Отчет</button>
             </div>
         </div>
     </div>
 
     <div id="page-mentor" class="page">
         <h1>Нейро-Ментор</h1>
-        <p>Анализ результатов и корректировка курса.</p>
-        <div class="card" style="background: rgba(255,255,255,0.03);">
-            <p style="color: var(--text-primary); font-size: 14px; margin-bottom: 0;">
-                <strong>ИИ:</strong> Анализ твоих метрик показывает просадку в секторе «Финансы». Рекомендую сместить фокус на монетизацию навыков. Прямое действие: составить коммерческое предложение для 3 потенциальных клиентов. Выброс дофамина от закрытой сделки закрепит паттерн успешного поведения.
-            </p>
+        <div class="subtitle">Прямая обратная связь от искусственного интеллекта.</div>
+        <div class="chat-container">
+            <div class="msg-ai" id="mentor-box">
+                Ожидание входящих отчетов для декомпозиции и оценки когнитивной нагрузки.
+            </div>
         </div>
     </div>
 
     <div id="page-arena" class="page">
-        <h1>Арена</h1>
-        <p>Рейтинг окружения за неделю.</p>
-        <div class="card">
-            <div class="leaderboard-item">
-                <div class="lb-rank">1</div>
-                <div class="lb-avatar" style="background: #E5E5EA; color: black;">А</div>
-                <div class="lb-info"><h4>Алексей</h4></div>
-                <div class="lb-score">450 XP</div>
+        <h1>Противостояние</h1>
+        <div class="subtitle">Синхронизация прогресса и верификация действий в реальном времени.</div>
+
+        <div class="vs-header">
+            <div class="vs-user">
+                <h4 id="my-name">Ты</h4>
+                <p>1440 XP</p>
             </div>
-            <div class="leaderboard-item">
-                <div class="lb-rank" style="color: var(--text-primary);">2</div>
-                <div class="lb-avatar" style="background: #333;">Т</div>
-                <div class="lb-info"><h4>Ты</h4></div>
-                <div class="lb-score">320 XP</div>
+            <div class="vs-divider">VS</div>
+            <div class="vs-user">
+                <h4>Алексей (Друг)</h4>
+                <p>1680 XP</p>
             </div>
-            <div class="leaderboard-item">
-                <div class="lb-rank">3</div>
-                <div class="lb-avatar" style="background: #333;">М</div>
-                <div class="lb-info"><h4>Максим</h4></div>
-                <div class="lb-score">180 XP</div>
+        </div>
+
+        <h2>Лента активности оппонента</h2>
+        
+        <div class="report-log">
+            <div class="report-log-header">
+                <span class="user-tag">Алексей</span>
+                <span class="date-tag">Сегодня, 10:14</span>
+            </div>
+            <div class="report-log-body">
+                Выполнил интеграцию парсера Telegram-каналов на Python. Настроил сбор ключевых слов для B2B лидогенерации, протестировал скорость обработки через асинхронные сессии. Код закоммичен на GitHub.
+            </div>
+            <div class="progress-labels" style="margin-top: 12px; font-size: 11px;">
+                <span style="color: #555;">ИИ-СТАТУС: ПОДТВЕРЖДЕНО (+50 XP)</span>
+            </div>
+        </div>
+
+        <div class="report-log">
+            <div class="report-log-header">
+                <span class="user-tag">Алексей</span>
+                <span class="date-tag">Вчера, 18:40</span>
+            </div>
+            <div class="report-log-body">
+                Провел силовую тренировку высокой интенсивности (фулбоди, 60 минут). Зафиксировал прогрессию нагрузок в базовых упражнениях для предотвращения адаптации мышечных волокон.
+            </div>
+            <div class="progress-labels" style="margin-top: 12px; font-size: 11px;">
+                <span style="color: #555;">ИИ-СТАТУС: ПОДТВЕРЖДЕНО (+30 XP)</span>
             </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="report-modal">
         <div class="modal" id="modal-content">
-            <h2 id="modal-task-title">Сдача отчета</h2>
-            <p>Опиши результаты. ИИ-ментор проверит отчет и начислит опыт.</p>
-            <textarea id="report-text" placeholder="Что конкретно было сделано? Какие результаты получены?"></textarea>
-            <button class="btn-submit" onclick="submitReport()">Отправить на проверку</button>
+            <h2 id="modal-task-title">Верификация действия</h2>
+            <div class="subtitle" style="margin-bottom: 16px;">Предоставь факты выполнения задачи для анализа нейросетью.</div>
+            <textarea id="report-text" placeholder="Укажи конкретные результаты, метрики или выполненные шаги..."></textarea>
+            <button class="btn-submit" onclick="submitReport()">Сдать отчет</button>
         </div>
     </div>
 
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('profile', this)">
-            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-            Профиль
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+            Статус
         </div>
         <div class="nav-item" onclick="switchTab('quests', this)">
-            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"/></svg>
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
             Фокус
         </div>
         <div class="nav-item" onclick="switchTab('mentor', this)">
-            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 11.5v-1c0-3.8-3.1-7-7-7h-4c-3.8 0-7 3.2-7 7v1c-1.7 0-3 1.3-3 3s1.3 3 3 3v2c0 2.2 1.8 4 4 4h10c2.2 0 4-1.8 4-4v-2c1.7 0 3-1.3 3-3s-1.3-3-3-3zm-10 8c-3.3 0-6-2.7-6-6v-2h12v2c0 3.3-2.7 6-6 6z"/></svg>
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l2.79-2.79C10.09 18.78 11.03 19 12 19c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
             Ментор
         </div>
         <div class="nav-item" onclick="switchTab('arena', this)">
-            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.14L18.73 19H5.27L12 6.14z"/></svg>
             Арена
         </div>
     </div>
@@ -253,26 +308,27 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.setHeaderColor('#0A0A0B'); // Черный премиум хедер
+        tg.setHeaderColor('#000000');
+        tg.setBackgroundColor('#000000');
         
         let currentQuestId = null;
 
-        // Приветствие из Телеграма
         if (tg.initDataUnsafe?.user) {
             document.getElementById('user-greeting').innerText = tg.initDataUnsafe.user.first_name;
+            document.getElementById('my-name').innerText = tg.initDataUnsafe.user.first_name;
+        } else {
+            document.getElementById('user-greeting').innerText = "System.User";
         }
 
-        // Переключение вкладок
         function switchTab(tabId, element) {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
             
             document.getElementById('page-' + tabId).classList.add('active');
             element.classList.add('active');
-            tg.HapticFeedback.selectionChanged(); // Легкая вибрация при смене вкладки
+            tg.HapticFeedback.selectionChanged();
         }
 
-        // Открытие модалки
         function openReportModal(questId, title) {
             currentQuestId = questId;
             document.getElementById('modal-task-title').innerText = title;
@@ -286,15 +342,13 @@
             tg.HapticFeedback.impactOccurred('light');
         }
 
-        // Закрытие модалки при клике на фон
         document.getElementById('report-modal').addEventListener('click', function(e) {
             if (e.target === this) {
                 document.getElementById('modal-content').classList.remove('open');
-                setTimeout(() => this.style.display = 'none', 300);
+                setTimeout(() => this.style.display = 'none', 200);
             }
         });
 
-        // Отправка данных обратно в Python
         function submitReport() {
             const text = document.getElementById('report-text').value;
             if (text.trim() === '') {
@@ -302,17 +356,15 @@
                 return;
             }
 
-            // Формируем JSON пакет
             const dataPacket = JSON.stringify({
                 action: "verify_quest",
                 quest_id: currentQuestId,
                 report: text
             });
 
-            // Отправляем данные в Telegram бота
+            // Данные гарантированно уйдут, так как мы изменили запуск приложения на Reply Keyboard
             tg.sendData(dataPacket);
             
-            // Закрываем окно приложения после успешной отправки
             tg.HapticFeedback.notificationOccurred('success');
             tg.close();
         }
